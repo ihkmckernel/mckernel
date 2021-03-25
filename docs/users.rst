@@ -28,7 +28,7 @@ Modify job script
 -----------------
 
 When using job submission system, you need to modify the job scripts so that the job script itself is going to run on Linux.
-For example, with Fujitsu Technical Computing Suite (TCS), you need to specify ``jobenv=mck1`` by inserting the following line into the job script:
+For example, with Fujitsu Technical Computing Suite (TCS), you need to specify the McKernel job environment, e.g., ``jobenv=mck1``, in the job script. The example:
 
 .. code-block:: none
 
@@ -107,6 +107,23 @@ Add ``--enable-uti`` option to ``mcexec``:
 ::
 
    mcexec --enable-uti <command>
+
+
+(Optional, Fujitsu TCS only) Specify McKernel image
+----------------------------------------------------
+
+You can specify a custom McKernel image file with the following steps.
+
+1. Ask the administrator to create the custom job environment under which McKernel image file can be specified.
+
+2. Specify the custom job environment, e.g. ``jobenv=my-mck``, and the file with ``PJM_JOBENV_MCKERNEL_IMAGE`` option when executing ``pjsub`` command. The example:
+
+::
+
+   pjsub --interact  --mpi "proc=1" \
+   -L "node=1:noncont,rscunit=rscunit_ft01,rscgrp=dvsys-mck24,elapse=10:00:00,jobenv=my-mck" \
+   --sparam wait-time=1000 \
+   -x PJM_JOBENV_MCKERNEL_IMAGE=/vol0004/g9300001/u93026/install/ihk+mckernel/smp-arm64/kernel/mckernel.img
 
 
 Limitations
