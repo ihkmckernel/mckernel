@@ -10,29 +10,39 @@ See `Quick Guide -- Architectural Overview <quick.html#architectural-overview>`_
 Running Programs
 ================
 
-You need to check if your application and pre-/post-processing programs are suited to run with McKernel.
-Follow the guide below to choose to run the whole on McKernel, or run the whole on Linux, or run pre-/post-processing on Linux and the application on McKernel:
+Check if your app is suited to McKernel
+---------------------------------------
 
-* Application
+You need to check if each of the main computation part, the input data preparation (pre-processing) part and the result processing  (post-processing) part of your application is suited to run on McKernel.
+Follow the guide below to decide to run on McKernel or Linux:
 
-  - Run the whole on Linux if it issues system calls frequently and becoming the bottleneck with McKernel, e.g., those performing many file I/O operations.
+* Main computation part
+
+  - Run it on Linux if it issues system calls frequently. This is because system calls take longer time in McKernel. The example is application performing many file I/O operations and application spawning processes or threads of the number much larger than the CPU count.
   - Otherwise, run it on McKernel.
 
-* Pre-/Post-processing
+* Pre-/Post-processing part
 
-  - Run it on McKernel if it consumes a large amount of memory or the execution time isn't prolonged prohivitively with McKernel. The reason for the first condition is that the resource could be limited for Linux CPUs in the nodes for McKernel.
+  - Run it on McKernel if the execution time isn't prolonged prohivitively with McKernel.
+  - Run it on McKernel if it consumes a large amount of memory. This is because Linux CPUs and McKernel CPUs can't share memory and amounts of memory allocated to them should be explicitly specified, and thus allocating a large amount of memory to Linux CPUs might make it impossible to run the main computation part on McKernel.
   - Otherwise, run it on Linux.
 
 
-Modify job script
------------------
+(Fujitsu TCS only) Modify job script
+------------------------------------
 
-When using job submission system, you need to modify the job scripts so that the job script itself is going to run on Linux.
-For example, with Fujitsu Technical Computing Suite (TCS), you need to specify the McKernel job environment, e.g., ``jobenv=mck1``, in the job script. The example:
+You need to tell the job submission system to use the McKernel job environment, in which the job script is interpreted by Linux and it spawns McKernel processes with ``mcexec`` command. The example:
 
 .. code-block:: none
 
    #PJM -L jobenv=mck1
+
+In addition, you need to tell the job submission system to allocate enough memory to the job ``cgroup`` for applications accessing large files. This is because the page cache takes memory from the job ``cgroup``. The example:
+
+.. code-block:: none
+
+   pjsub ... -x "PJM_JOBENV_MCKERNEL_JOBMEM=$((1024*1024*1024))"
+
 
 (Optional, Fujitsu TCS only) Specify boot parameters
 ----------------------------------------------------
